@@ -45,61 +45,68 @@
 #include "model_reader.h"
 
 namespace seeta {
-namespace fd {
+    namespace fd {
 
-class FuStDetector : public Detector {
- public:
-  FuStDetector()
-      : wnd_size_(40), slide_wnd_step_x_(4), slide_wnd_step_y_(4),
-        num_hierarchy_(0) {
-    wnd_data_buf_.resize(wnd_size_ * wnd_size_);
-    wnd_data_.resize(wnd_size_ * wnd_size_);
-  }
+        class FuStDetector : public Detector {
+        public:
+            FuStDetector() : wnd_size_(40), slide_wnd_step_x_(4), slide_wnd_step_y_(4), num_hierarchy_(0) {
+                // 初始化 window data的大小
+                wnd_data_buf_.resize(wnd_size_ * wnd_size_);
+                wnd_data_.resize(wnd_size_ * wnd_size_);
+            }
 
-  ~FuStDetector() {}
+            ~FuStDetector() { }
 
-  virtual bool LoadModel(const std::string & model_path);
-  virtual std::vector<seeta::FaceInfo> Detect(seeta::fd::ImagePyramid* img_pyramid);
+            virtual bool LoadModel(const std::string &model_path);
 
-  inline virtual void SetWindowSize(int32_t size) {
-    if (size >= 20)
-      wnd_size_ = size;
-  }
+            virtual std::vector<seeta::FaceInfo> Detect(seeta::fd::ImagePyramid *img_pyramid);
 
-  inline virtual void SetSlideWindowStep(int32_t step_x, int32_t step_y) {
-    if (step_x > 0)
-      slide_wnd_step_x_ = step_x;
-    if (step_y > 0)
-      slide_wnd_step_y_ = step_y;
-  }
+            inline virtual void SetWindowSize(int32_t size) {
+                if (size >= 20) {
+                    wnd_size_ = size;
+                }
+            }
 
- private:
-  std::shared_ptr<seeta::fd::ModelReader> CreateModelReader(seeta::fd::ClassifierType type);
-  std::shared_ptr<seeta::fd::Classifier> CreateClassifier(seeta::fd::ClassifierType type);
-  std::shared_ptr<seeta::fd::FeatureMap> CreateFeatureMap(seeta::fd::ClassifierType type);
+            inline virtual void SetSlideWindowStep(int32_t step_x, int32_t step_y) {
+                if (step_x > 0) {
+                    slide_wnd_step_x_ = step_x;
+                }
+                if (step_y > 0) {
+                    slide_wnd_step_y_ = step_y;
+                }
+            }
 
-  void GetWindowData(const seeta::ImageData & img, const seeta::Rect & wnd);
+        private:
+            std::shared_ptr<seeta::fd::ModelReader> CreateModelReader(seeta::fd::ClassifierType type);
 
-  int32_t wnd_size_;
-  int32_t slide_wnd_step_x_;
-  int32_t slide_wnd_step_y_;
+            std::shared_ptr<seeta::fd::Classifier> CreateClassifier(seeta::fd::ClassifierType type);
 
-  int32_t num_hierarchy_;
-  std::vector<int32_t> hierarchy_size_;
-  std::vector<int32_t> num_stage_;
-  std::vector<std::vector<int32_t> > wnd_src_id_;
+            std::shared_ptr<seeta::fd::FeatureMap> CreateFeatureMap(seeta::fd::ClassifierType type);
 
-  std::vector<uint8_t> wnd_data_buf_;
-  std::vector<uint8_t> wnd_data_;
+            void GetWindowData(const seeta::ImageData &img, const seeta::Rect &wnd);
 
-  std::vector<std::shared_ptr<seeta::fd::Classifier> > model_;
-  std::vector<std::shared_ptr<seeta::fd::FeatureMap> > feat_map_;
-  std::map<seeta::fd::ClassifierType, int32_t> cls2feat_idx_;
+            int32_t wnd_size_;
+            int32_t slide_wnd_step_x_;
+            int32_t slide_wnd_step_y_;
 
-  DISABLE_COPY_AND_ASSIGN(FuStDetector);
-};
+            int32_t num_hierarchy_;
+            std::vector<int32_t> hierarchy_size_;
+            std::vector<int32_t> num_stage_;
+            std::vector<std::vector<int32_t> > wnd_src_id_;
 
-}  // namespace fd
+            std::vector<uint8_t> wnd_data_buf_;
+            std::vector<uint8_t> wnd_data_;
+
+            std::vector<std::shared_ptr<seeta::fd::Classifier> > model_;
+            std::vector<std::shared_ptr<seeta::fd::FeatureMap> > feat_map_;
+            std::map<seeta::fd::ClassifierType, int32_t> cls2feat_idx_;
+
+
+            // 如何禁用拷贝赋值构造函数呢?
+        DISABLE_COPY_AND_ASSIGN(FuStDetector);
+        };
+
+    }  // namespace fd
 }  // namespace seeta
 
 #endif  // SEETA_FD_FUST_H_

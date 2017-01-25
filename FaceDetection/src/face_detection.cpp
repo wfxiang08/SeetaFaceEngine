@@ -40,16 +40,18 @@
 
 namespace seeta {
 
+    // 定义人脸检测的具体实现
     class FaceDetection::Impl {
     public:
-        Impl()
-                : detector_(new seeta::fd::FuStDetector()),
-                  slide_wnd_step_x_(4), slide_wnd_step_y_(4),
-                  min_face_size_(20), max_face_size_(-1),
-                  cls_thresh_(3.85f) { }
+        Impl() : detector_(new seeta::fd::FuStDetector()), slide_wnd_step_x_(4), slide_wnd_step_y_(4),
+                 min_face_size_(20), max_face_size_(-1), cls_thresh_(3.85f) {
+            // 默认的detector
+            // FuStDetector
+        }
 
         ~Impl() { }
 
+        // 是否为合法的图片
         inline bool IsLegalImage(const seeta::ImageData &image) {
             return (image.num_channels == 1 && image.width > 0 && image.height > 0 &&
                     image.data != nullptr);
@@ -69,32 +71,35 @@ namespace seeta {
         seeta::fd::ImagePyramid img_pyramid_;
     };
 
-    FaceDetection::FaceDetection(const char *model_path)
-            : impl_(new seeta::FaceDetection::Impl()) {
+    FaceDetection::FaceDetection(const char *model_path) : impl_(new seeta::FaceDetection::Impl()) {
+        // 通过Proxy方法，将所有的实现转交给Impl
         impl_->detector_->LoadModel(model_path);
     }
 
     FaceDetection::~FaceDetection() {
-        if (impl_ != nullptr)
+        if (impl_ != nullptr) {
             delete impl_;
+        }
     }
 
-    std::vector<seeta::FaceInfo> FaceDetection::Detect(
-            const seeta::ImageData &img) {
+    std::vector<seeta::FaceInfo> FaceDetection::Detect(const seeta::ImageData &img) {
+        // 如何检测人脸呢?
+        // 首先必须是灰度图
         if (!impl_->IsLegalImage(img))
             return std::vector<seeta::FaceInfo>();
 
+        // 计算 min_img_size
+        //    受限于图片本身的大小，模型支持的最大的尺寸
         int32_t min_img_size = img.height <= img.width ? img.height : img.width;
-        min_img_size = (impl_->max_face_size_ > 0 ?
-                        (min_img_size >= impl_->max_face_size_ ? impl_->max_face_size_ : min_img_size) :
-                        min_img_size);
+        if (impl_->max_face_size_ > 0 && min_img_size > impl_->max_face_size_) {
+            min_img_size = impl_->max_face_size_;
+        }
 
         impl_->img_pyramid_.SetImage1x(img.data, img.width, img.height);
         impl_->img_pyramid_.SetMinScale(static_cast<float>(impl_->kWndSize) / min_img_size);
 
         impl_->detector_->SetWindowSize(impl_->kWndSize);
-        impl_->detector_->SetSlideWindowStep(impl_->slide_wnd_step_x_,
-                                             impl_->slide_wnd_step_y_);
+        impl_->detector_->SetSlideWindowStep(impl_->slide_wnd_step_x_, impl_->slide_wnd_step_y_);
 
         impl_->pos_wnds_ = impl_->detector_->Detect(&(impl_->img_pyramid_));
 

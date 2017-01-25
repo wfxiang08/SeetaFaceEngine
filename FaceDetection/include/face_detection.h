@@ -39,68 +39,71 @@
 
 namespace seeta {
 
-class FaceDetection {
- public:
-  SEETA_API explicit FaceDetection(const char* model_path);
-  SEETA_API ~FaceDetection();
+    // 定义了人脸检测的接口
+    class FaceDetection {
+    public:
+        SEETA_API explicit FaceDetection(const char *model_path);
 
-  /**
-   * @brief Detect faces on input image.
-   *
-   * (1) The input image should be gray-scale, i.e. `num_channels` set to 1.
-   * (2) Currently this function does not give the Euler angles, which are
-   *     left with invalid values.
-   */
-  SEETA_API std::vector<seeta::FaceInfo> Detect(const seeta::ImageData & img);
+        SEETA_API ~FaceDetection();
 
-  /**
-   * @brief Set the minimum size of faces to detect.
-   *
-   * The minimum size is constrained as no smaller than 20. Invalid values will
-   * be ignored.
-   */
-  SEETA_API void SetMinFaceSize(int32_t size);
+        /**
+         * @brief Detect faces on input image.
+         *
+         * (1) The input image should be gray-scale, i.e. `num_channels` set to 1.
+         * (2) Currently this function does not give the Euler angles, which are
+         *     left with invalid values.
+         */
+        SEETA_API std::vector<seeta::FaceInfo> Detect(const seeta::ImageData &img);
 
-  /** 
-   * @brief Set the maximum size of faces to detect.
-   * 
-   * The maximum face size actually used is computed as the minimum among: user
-   * specified size, image width, image height.
-   */
-  SEETA_API void SetMaxFaceSize(int32_t size);
+        /**
+         * @brief Set the minimum size of faces to detect.
+         *
+         * The minimum size is constrained as no smaller than 20. Invalid values will
+         * be ignored.
+         */
+        SEETA_API void SetMinFaceSize(int32_t size);
 
-  /**
-   * @brief Set the factor between adjacent scales of image pyramid.
-   *
-   * The value of the factor lies in (0, 1). For example, when it is set as 0.5,
-   * an input image of size w x h will be resized to 0.5w x 0.5h, 0.25w x 0.25h,
-   * 0.125w x 0.125h, etc. Invalid values will be ignored.
-   */
-  SEETA_API void SetImagePyramidScaleFactor(float factor);
+        /**
+         * @brief Set the maximum size of faces to detect.
+         *
+         * The maximum face size actually used is computed as the minimum among: user
+         * specified size, image width, image height.
+         */
+        SEETA_API void SetMaxFaceSize(int32_t size);
 
-  /**
-   * @brief Set the sliding window step in horizontal and vertical directions.
-   * 
-   * The steps should take positive values, and invalid ones will be ignored.
-   * Usually a step of 4 is a reasonable choice.
-   */
-  SEETA_API void SetWindowStep(int32_t step_x, int32_t step_y);
+        /**
+         * @brief Set the factor between adjacent scales of image pyramid.
+         *
+         * The value of the factor lies in (0, 1). For example, when it is set as 0.5,
+         * an input image of size w x h will be resized to 0.5w x 0.5h, 0.25w x 0.25h,
+         * 0.125w x 0.125h, etc. Invalid values will be ignored.
+         */
+        SEETA_API void SetImagePyramidScaleFactor(float factor);
 
-  /**
-   * @brief Set the score thresh of detected faces.
-   *
-   * Detections with scores smaller than the threshold will not be returned.
-   * Typical threshold values include 0.95, 2.8, 4.5. One can adjust the
-   * threshold based on his or her own test set.
-   */
-  SEETA_API void SetScoreThresh(float thresh);
+        /**
+         * @brief Set the sliding window step in horizontal and vertical directions.
+         *
+         * The steps should take positive values, and invalid ones will be ignored.
+         * Usually a step of 4 is a reasonable choice.
+         */
+        SEETA_API void SetWindowStep(int32_t step_x, int32_t step_y);
 
-  DISABLE_COPY_AND_ASSIGN(FaceDetection);
+        /**
+         * @brief Set the score thresh of detected faces.
+         *
+         * Detections with scores smaller than the threshold will not be returned.
+         * Typical threshold values include 0.95, 2.8, 4.5. One can adjust the
+         * threshold based on his or her own test set.
+         */
+        SEETA_API void SetScoreThresh(float thresh);
 
- private:
-  class Impl;
-  Impl* impl_;
-};
+    DISABLE_COPY_AND_ASSIGN(FaceDetection);
+
+    private:
+        // 具体实现
+        class Impl;
+        Impl *impl_;
+    };
 
 }  // namespace seeta
 

@@ -60,6 +60,7 @@ int main(int argc, char **argv) {
     cv::Mat img = cv::imread(img_path, cv::IMREAD_UNCHANGED);
     cv::Mat img_gray;
 
+    // 转换为灰度图
     if (img.channels() != 1)
         cv::cvtColor(img, img_gray, cv::COLOR_BGR2GRAY);
     else
@@ -72,7 +73,9 @@ int main(int argc, char **argv) {
     img_data.num_channels = 1;
 
     long t0 = cv::getTickCount();
+    // 检测人脸
     std::vector<seeta::FaceInfo> faces = detector.Detect(img_data);
+
     long t1 = cv::getTickCount();
     double secs = (t1 - t0) / cv::getTickFrequency();
 

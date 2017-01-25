@@ -48,6 +48,7 @@ namespace seeta {
     namespace fd {
 
         bool FuStDetector::LoadModel(const std::string &model_path) {
+            // 如何加载Model呢?
             std::ifstream model_file(model_path, std::ifstream::binary);
             bool is_loaded = true;
 
@@ -67,10 +68,11 @@ namespace seeta {
                 std::shared_ptr<seeta::fd::Classifier> classifier;
                 seeta::fd::ClassifierType classifier_type;
 
+                // 读取 hierarchy 信息
                 model_file.read(reinterpret_cast<char *>(&num_hierarchy_), sizeof(int32_t));
                 for (int32_t i = 0; is_loaded && i < num_hierarchy_; i++) {
-                    model_file.read(reinterpret_cast<char *>(&hierarchy_size),
-                                    sizeof(int32_t));
+                    // 每一层内部
+                    model_file.read(reinterpret_cast<char *>(&hierarchy_size), sizeof(int32_t));
                     hierarchy_size_.push_back(hierarchy_size);
 
                     for (int32_t j = 0; is_loaded && j < hierarchy_size; j++) {
@@ -80,19 +82,18 @@ namespace seeta {
                         for (int32_t k = 0; is_loaded && k < num_stage; k++) {
                             model_file.read(reinterpret_cast<char *>(&type_id), sizeof(int32_t));
                             classifier_type = static_cast<seeta::fd::ClassifierType>(type_id);
+
+                            // 每一层读取N个stage
                             reader = CreateModelReader(classifier_type);
                             classifier = CreateClassifier(classifier_type);
 
-                            is_loaded = !model_file.fail() &&
-                                        reader->Read(&model_file, classifier.get());
+                            is_loaded = !model_file.fail() && reader->Read(&model_file, classifier.get());
                             if (is_loaded) {
                                 model_.push_back(classifier);
                                 std::shared_ptr<seeta::fd::FeatureMap> feat_map;
                                 if (cls2feat_idx_.count(classifier_type) == 0) {
                                     feat_map_.push_back(CreateFeatureMap(classifier_type));
-                                    cls2feat_idx_.insert(
-                                            std::map<seeta::fd::ClassifierType, int32_t>::value_type(
-                                                    classifier_type, feat_map_index++));
+                                    cls2feat_idx_.insert(std::map<seeta::fd::ClassifierType, int32_t>::value_type(classifier_type, feat_map_index++));
                                 }
                                 feat_map = feat_map_[cls2feat_idx_.at(classifier_type)];
                                 model_.back()->SetFeatureMap(feat_map.get());
@@ -104,8 +105,7 @@ namespace seeta {
                         if (num_wnd_src > 0) {
                             wnd_src_id_.back().resize(num_wnd_src);
                             for (int32_t k = 0; k < num_wnd_src; k++) {
-                                model_file.read(reinterpret_cast<char *>(&(wnd_src_id_.back()[k])),
-                                                sizeof(int32_t));
+                                model_file.read(reinterpret_cast<char *>(&(wnd_src_id_.back()[k])), sizeof(int32_t));
                             }
                         }
                     }
@@ -117,14 +117,14 @@ namespace seeta {
             return is_loaded;
         }
 
-        std::vector<seeta::FaceInfo> FuStDetector::Detect(
-                seeta::fd::ImagePyramid *img_pyramid) {
+        std::vector<seeta::FaceInfo> FuStDetector::Detect(seeta::fd::ImagePyramid *img_pyramid) {
+
             float score;
             seeta::FaceInfo wnd_info;
             seeta::Rect wnd;
+
             float scale_factor = 0.0;
-            const seeta::ImageData *img_scaled =
-                    img_pyramid->GetNextScaleImage(&scale_factor);
+            const seeta::ImageData *img_scaled = img_pyramid->GetNextScaleImage(&scale_factor);
 
             wnd.height = wnd.width = wnd_size_;
 
@@ -135,14 +135,14 @@ namespace seeta {
                     feat_map_[cls2feat_idx_[model_[0]->type()]];
 
             while (img_scaled != nullptr) {
-                feat_map_1->Compute(img_scaled->data, img_scaled->width,
-                                    img_scaled->height);
+                feat_map_1->Compute(img_scaled->data, img_scaled->width, img_scaled->height);
 
                 wnd_info.bbox.width = static_cast<int32_t>(wnd_size_ / scale_factor + 0.5);
                 wnd_info.bbox.height = wnd_info.bbox.width;
 
                 int32_t max_x = img_scaled->width - wnd_size_;
                 int32_t max_y = img_scaled->height - wnd_size_;
+                
                 for (int32_t y = 0; y <= max_y; y += slide_wnd_step_y_) {
                     wnd.y = y;
                     for (int32_t x = 0; x <= max_x; x += slide_wnd_step_x_) {
