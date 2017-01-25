@@ -41,71 +41,74 @@
 #include "feat/lab_feature_map.h"
 
 namespace seeta {
-namespace fd {
+    namespace fd {
 
 /**
  * @class LABBaseClassifier
  * @brief Base classifier using LAB feature.
  */
-class LABBaseClassifier {
- public:
-  LABBaseClassifier()
-    : num_bin_(255), thresh_(0.0f) {
-    weights_.resize(num_bin_ + 1);
-  }
+        class LABBaseClassifier {
+        public:
+            LABBaseClassifier() : num_bin_(255), thresh_(0.0f) {
+                weights_.resize(num_bin_ + 1);
+            }
 
-  ~LABBaseClassifier() {}
+            ~LABBaseClassifier() { }
 
-  void SetWeights(const float* weights, int32_t num_bin);
+            void SetWeights(const float *weights, int32_t num_bin);
 
-  inline void SetThreshold(float thresh) { thresh_ = thresh; }
+            inline void SetThreshold(float thresh) { thresh_ = thresh; }
 
-  inline int32_t num_bin() const { return num_bin_; }
-  inline float weights(int32_t val) const { return weights_[val]; }
-  inline float threshold() const { return thresh_; }
+            inline int32_t num_bin() const { return num_bin_; }
 
- private:
-  int32_t num_bin_;
+            inline float weights(int32_t val) const { return weights_[val]; }
 
-  std::vector<float> weights_;
-  float thresh_;
-};
+            inline float threshold() const { return thresh_; }
+
+        private:
+            int32_t num_bin_;
+
+            std::vector<float> weights_;
+            float thresh_;
+        };
 
 /**
  * @class LABBoostedClassifier
  * @Brief A strong classifier constructed from base classifiers using LAB features.
  */
-class LABBoostedClassifier : public Classifier {
- public:
-  LABBoostedClassifier() : use_std_dev_(true) {}
-  virtual ~LABBoostedClassifier() {}
+        class LABBoostedClassifier : public Classifier {
+        public:
+            LABBoostedClassifier() : use_std_dev_(true) { }
 
-  virtual bool Classify(float* score = nullptr, float* outputs = nullptr);
+            virtual ~LABBoostedClassifier() { }
 
-  inline virtual seeta::fd::ClassifierType type() {
-    return seeta::fd::ClassifierType::LAB_Boosted_Classifier;
-  }
+            virtual bool Classify(float *score = nullptr, float *outputs = nullptr);
 
-  void AddFeature(int32_t x, int32_t y);
-  void AddBaseClassifier(const float* weights, int32_t num_bin, float thresh);
+            inline virtual seeta::fd::ClassifierType type() {
+                return seeta::fd::ClassifierType::LAB_Boosted_Classifier;
+            }
 
-  inline virtual void SetFeatureMap(seeta::fd::FeatureMap* featMap) {
-    feat_map_ = dynamic_cast<seeta::fd::LABFeatureMap*>(featMap);
-  }
+            void AddFeature(int32_t x, int32_t y);
 
-  inline void SetUseStdDev(bool useStdDev) { use_std_dev_ = useStdDev; }
+            void AddBaseClassifier(const float *weights, int32_t num_bin, float thresh);
 
- private:
-  static const int32_t kFeatGroupSize = 10;
-  const float kStdDevThresh = 10.0f;
+            inline virtual void SetFeatureMap(seeta::fd::FeatureMap *featMap) {
+                feat_map_ = dynamic_cast<seeta::fd::LABFeatureMap *>(featMap);
+            }
 
-  std::vector<seeta::fd::LABFeature> feat_;
-  std::vector<std::shared_ptr<seeta::fd::LABBaseClassifier> > base_classifiers_;
-  seeta::fd::LABFeatureMap* feat_map_;
-  bool use_std_dev_;
-};
+            inline void SetUseStdDev(bool useStdDev) { use_std_dev_ = useStdDev; }
 
-}  // namespace fd
+        private:
+            static const int32_t kFeatGroupSize = 10;
+            const float kStdDevThresh = 10.0f;
+
+            std::vector<seeta::fd::LABFeature> feat_;
+            std::vector<std::shared_ptr<seeta::fd::LABBaseClassifier> > base_classifiers_;
+            seeta::fd::LABFeatureMap *feat_map_;
+            bool use_std_dev_;
+        };
+
+    }  // namespace fd
 }  // namespace seeta
 
 #endif  // SEETA_FD_CLASSIFIER_LAB_BOOSTED_CLASSIFIER_H_

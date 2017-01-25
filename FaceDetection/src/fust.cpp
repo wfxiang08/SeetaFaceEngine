@@ -142,7 +142,7 @@ namespace seeta {
 
                 int32_t max_x = img_scaled->width - wnd_size_;
                 int32_t max_y = img_scaled->height - wnd_size_;
-                
+
                 for (int32_t y = 0; y <= max_y; y += slide_wnd_step_y_) {
                     wnd.y = y;
                     for (int32_t x = 0; x <= max_x; x += slide_wnd_step_x_) {

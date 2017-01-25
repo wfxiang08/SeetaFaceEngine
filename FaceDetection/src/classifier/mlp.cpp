@@ -41,9 +41,7 @@ namespace seeta {
             {
 #pragma omp for nowait
                 for (int32_t i = 0; i < output_dim_; i++) {
-                    output[i] = seeta::fd::MathFunction::VectorInnerProduct(input,
-                                                                            weights_.data() + i * input_dim_,
-                                                                            input_dim_) + bias_[i];
+                    output[i] = seeta::fd::MathFunction::VectorInnerProduct(input, weights_.data() + i * input_dim_, input_dim_) + bias_[i];
                     output[i] = (act_func_type_ == 1 ? ReLU(output[i]) : Sigmoid(-output[i]));
                 }
             }
